@@ -13,11 +13,10 @@ CREATE TABLE customer_table (
     birth_date DATE NOT NULL,
     UNIQUE (email, cpf, customer_id),
     /*
-        Verificações básicas dos dados do cliente - len/regex 
+        Verificações básicas dos dados do cliente -> regex 
         A verificação da data de nascimento está na pasta de triggers
     */
-    CONSTRAINT check_cpf_len CHECK(LENGTH(cpf) = 11),
-    CONSTRAINT check_cpf_digits CHECK(cpf REGEXP '[0-9]+$'),
+    CONSTRAINT check_cpf_digits CHECK(cpf REGEXP '^[0-9]{11}$'),
     CONSTRAINT check_email CHECK(
         email REGEXP '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$')
 );
