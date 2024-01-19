@@ -1,4 +1,3 @@
--- Active: 1705494485158@@127.0.0.1@3306@autoloc_db
 
 /*
     Tabela de log
