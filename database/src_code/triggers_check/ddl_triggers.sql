@@ -79,3 +79,17 @@ BEGIN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ano inválido.'; 
     END IF;
 END;
+
+/*
+    Trigger para a atualização automática da kilometragem do veículo
+    após o retorno e a atualização na tabela rent_table
+*/
+
+CREATE TRIGGER update_car_mileage_km
+AFTER UPDATE ON rent_table 
+FOR EACH ROW 
+BEGIN
+    UPDATE car_table
+    SET mileage_km = mileage_km + rent_table.kms_driven
+    WHERE rent_table.fk_car_id = car_id;
+END;
