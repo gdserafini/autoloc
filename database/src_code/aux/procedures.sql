@@ -1,9 +1,3 @@
-/*
-    Principais view relacionadas ao domínio de negócio
-    -também algumas procedures
-*/
-
-
 
 /*
     Funções para calculo de diferença de tempo
@@ -27,6 +21,9 @@ BEGIN
     RETURN customer_age;
 END;
 
+/*
+    Sumarização dos dados referentes a locação
+*/
 CREATE PROCEDURE print_rent_info()
 BEGIN
     SELECT 
