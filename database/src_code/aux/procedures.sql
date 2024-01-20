@@ -24,6 +24,7 @@ END;
 /*
     Sumarização dos dados referentes a locação
 */
+--Deprecated
 CREATE PROCEDURE print_rent_info()
 BEGIN
     SELECT 
