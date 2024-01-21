@@ -36,7 +36,7 @@ CREATE TABLE customer_table (
 
 CREATE TABLE car_table (
     car_id INT PRIMARY KEY NOT NULL,
-    plate VARCHAR(7) NOT NULL,
+    plate VARCHAR(8) NOT NULL,
     mileage_km INT NOT NULL,
     year YEAR NOT NULL,
     fk_model_id INT NOT NULL,
@@ -53,6 +53,10 @@ CREATE TABLE car_table (
     )
 );
 
+ALTER TABLE car_table
+ADD CONSTRAINT check_plate_format
+CHECK(plate REGEXP '^[A-Za-z]{3}[0-9]{4}$|^[A-Za-z]{3}[0-9][A-Za-z][0-9]{2}$');
+
 CREATE TABLE model_table (
     model_id INT PRIMARY KEY NOT NULL,
     brand VARCHAR(25) NOT NULL,
@@ -63,6 +67,11 @@ CREATE TABLE model_table (
         motorization REGEXP '^[0-9]+\.[A-Za-z][0-9] [A-Za-z]+$'
     )
 );
+
+ALTER TABLE model_table DROP CHECK check_motorization_format;
+ALTER TABLE model_table
+ADD CONSTRAINT check_motorization_format
+CHECK (motorization REGEXP '^[0-9]{1}\.[0-9]{1} ([A-Za-z]{1}[0-9]{1,2}) [A-Za-z]{1,10}')
 
 CREATE TABLE employee_table (
     employee_id INT PRIMARY KEY NOT NULL,

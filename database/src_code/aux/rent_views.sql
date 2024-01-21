@@ -12,3 +12,7 @@ INNER JOIN customer_table as ct
     ON ct.customer_id = rt.fk_customer_id
 GROUP BY ct.name 
 ORDER BY `Valor total (R$)` DESC;
+
+SELECT * FROM customer_view;
+
+CALL print_rent_info();
