@@ -4,7 +4,7 @@
 */
 CREATE FUNCTION get_customer_age(id INT)
 RETURNS INT
-DETERMINISTIC
+DETERMINISTIC /* retorna o mesmo valor qnd passado o mesmo param */
 BEGIN
     DECLARE customer_birth DATE;
     DECLARE customer_age INT;
@@ -24,7 +24,7 @@ END;
 /*
     Sumarização dos dados referentes a locação
 */
---Deprecated
+--Deprecated -> TODO - table with triggers
 CREATE PROCEDURE print_rent_info()
 BEGIN
     SELECT 

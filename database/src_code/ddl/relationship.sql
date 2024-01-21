@@ -5,12 +5,13 @@
     -estão setadas na forma mais lógica para o domínio do negócio
 */
 
-ALTER TABLE car_table 
+ALTER TABLE car_table /* tabela filho */
 ADD CONSTRAINT fk_car_table_relat
-    FOREIGN KEY (fk_model_id)
-    REFERENCES model_table (model_id)
+    FOREIGN KEY (fk_model_id) /* ref -> model_id */
+    REFERENCES model_table (model_id) /* tabela pai */
+    /* não deleta model_table se houver algum car_table referenciado */
     ON DELETE RESTRICT 
-    ON UPDATE CASCADE;
+    ON UPDATE CASCADE; /* atualiza car_table se atualizar model_table */
  
 ALTER TABLE telephone_table
 ADD CONSTRAINT fk_telephone_table_relat

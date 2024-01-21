@@ -1,7 +1,7 @@
 
 /*
     Triggers para validação de dados 
-    -Principalmente dados relacionados a datas e peridos de tempo
+    -Principalmente dados relacionados a datas e periodos de tempo
 */
 
 CREATE TRIGGER check_birth_date_insert

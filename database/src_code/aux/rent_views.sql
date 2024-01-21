@@ -1,4 +1,5 @@
 
+/* consulta armazenada dos clientes -> tabela virtual (query) */
 CREATE VIEW customer_view AS 
 SELECT 
     ct.name AS 'Nome',
