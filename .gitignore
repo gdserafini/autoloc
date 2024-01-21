@@ -1,4 +1,5 @@
 database/scripts/db_config.json
+database/src_code/test.sql
 
 *~
 *.a
