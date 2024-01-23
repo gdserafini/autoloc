@@ -9,6 +9,7 @@ TELEPHONES_SIZE = 1500
 MODELS_SIZE = 10
 CARS_SIZE = 100
 EMPLOYEES_SIZE = 25
+RENTS_SIZE = 2500
 
 def get_json_file(path: str, file_name: str) -> dict:
     try:
@@ -120,9 +121,69 @@ def insert_employees(cursor: Any) -> None:
     except Exception as ex:
         raise Exception(f'File error: {ex}')
 
+
+
+###TODO -> REVISAR E FINALIZAR SCRIPT
+def is_located(cursor: Any, car_id: int, date: str) -> bool:
+    cursor.execute(
+        f"""
+            SELECT rent_id FROM rent_table 
+            WHEN car_id = {car_id} AND {date} >= start AND {date} <= end_time
+        """
+    )
+    return len(cursor.fetchall()) == 0
+    
+def increment_date(date: str, incr_h=0, incr_d=0) -> str:
+    datetime_list = date.split()
+    date = datetime_list[0].split('-')
+    time = datetime_list[1].split(':')
+    date[1] += incr_d
+    time[1] += incr_h
+    return f'{date[0]}-{date[1]}-{date[2]} {time[0]}:{time[1]}:{time[2]}'
+
+def decremet_date(date: str, drec_h=0, decr_d=0) -> str:
+    datetime_list = date.split()
+    date = datetime_list[0].split('-')
+    time = datetime_list[1].split(':')
+    date[1] -= decr_d
+    time[1] -= drec_h
+    return f'{date[0]}-{date[1]}-{date[2]} {time[0]}:{time[1]}:{time[2]}'
+
 def insert_rents(cursor: Any) -> None:
-    #Usar datas incrementais até o momento
-    pass
+    date = '2023-01-00 00:00:00'
+    steps_day = [1,2,3]
+    counter = 0
+    values = [1000, 2000, 3000]
+    insurances = ['SILVER', 'GOLD', 'PLATINUM']
+    while counter < 2500:
+        car_id = rd.randint(1,CARS_SIZE)
+        incr_step = steps_day[rd.randint(0,2)]
+        date = increment_date(date, incr_d=incr_step)
+        if is_located(cursor, car_id, date): 
+            date = decremet_date(date, decr_d=incr_step)
+            continue
+        else:
+            value = values[rd.randint(0,2)]
+            cursor.execute(
+                f"""
+                    INSERT INTO rent_table(
+                        rent_id, value, start, 
+                        end_time, kms_driven, fk_employee_id,
+                        fk_car_id, fk_customer_id, insurance_type
+                    )
+                    VALUES(
+                        {counter+1}, {value}, {date},
+                        {increment_date(date, incr_d=incr_step)}, {value}, 
+                        {rd.randint(1,EMPLOYEES_SIZE)},
+                        {rd.randint(1, CARS_SIZE)}, {rd.randint(1, CUSTOMERS_SIZE)}, 
+                        {insurances[rd.randint(0,2)]}
+                    )
+                """
+            )
+            counter += 1
+###
+
+
 
 def main():
     try:
@@ -135,6 +196,14 @@ def main():
         #insert_models(cursor)
         #insert_cars(cursor)
         #insert_employees(cursor)
+        
+
+        
+        ###
+        #insert_rents(cursor)
+
+
+
     except mysql.connector.Error as error:
         print(f'DB error: {error}')
     finally:
