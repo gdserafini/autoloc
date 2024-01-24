@@ -108,3 +108,7 @@ CREATE TABLE rent_table (
         insurance_type REGEXP '^(silver|gold|platinum)$'
     )
 );
+
+ALTER TABLE rent_table
+ADD CONSTRAINT check_insurance_type_options
+CHECK(insurance_type REGEXP '^(silver|gold|platinum)$');
