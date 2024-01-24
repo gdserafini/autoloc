@@ -3,6 +3,7 @@ import json
 from typing import Any
 import random as rd
 import string as st
+from datetime import datetime, timedelta
 
 CUSTOMERS_SIZE = 1000
 TELEPHONES_SIZE = 1500
@@ -11,19 +12,20 @@ CARS_SIZE = 100
 EMPLOYEES_SIZE = 25
 RENTS_SIZE = 2500
 
-def get_json_file(path: str, file_name: str) -> dict:
+def read_file(path: str, file_name: str, type='json') -> Any:
     try:
-        with open(f'{path}/{file_name}') as config_file:
-            return json.load(config_file)
-    except Exception as ex:
-        raise Exception(f'File error: {ex}')
+        with open(f'{path}/{file_name}', 'r') as file:
+            if type == 'json': return json.load(file)
+            elif type == 'list':
+                return [_.strip() for _ in file.readlines()]
+            else: return file
+    except:
+        raise Exception('File error.')
 
 def insert_customer_random_data(cursor: Any) -> None:
     try:
-        with open('database/scripts/data/customers_name.txt', 'r') as names_file:
-            names = [n.strip() for n in names_file.readlines()]
-        with open('database/scripts/data/customers_surname.txt', 'r') as surnames_file:
-            surnames = [sn.strip() for sn in surnames_file.readlines()]
+        names = read_file('database/scripts/data', 'customers_name.txt', 'list')
+        surnames = read_file('database/scripts/data', 'customers_surname.txt', 'list')
         for id in range(CUSTOMERS_SIZE):
             customer_name = names[rd.randint(0,len(names)-1)]
             customer_surname = surnames[rd.randint(0,len(surnames)-1)]
@@ -56,8 +58,7 @@ def insert_telephones(cursor: Any) -> None:
         raise Exception(f'File error: {ex}')
     
 def insert_models(cursor: Any) -> None:
-    with open('database/scripts/data/models.txt') as models_file:
-        models = [model.strip() for model in models_file.readlines()]
+    models = read_file('database/scripts/data', 'models.txt', 'list')
     motorization = ['2.0 l4 turbo', '3.0 l6 turbo', '4.0 v8 biturbo']
     for i in range(MODELS_SIZE):
         motor = motorization[rd.randint(0,2)]
@@ -103,10 +104,8 @@ def insert_cars(cursor: Any) -> None:
 
 def insert_employees(cursor: Any) -> None:
     try:
-        with open('database/scripts/data/customers_name.txt', 'r') as names_file:
-            names = [n.strip() for n in names_file.readlines()]
-        with open('database/scripts/data/customers_surname.txt', 'r') as surnames_file:
-            surnames = [sn.strip() for sn in surnames_file.readlines()]
+        names = read_file('database/scripts/data', 'customers_name.txt', 'list')
+        surnames = read_file('database/scripts/data', 'customers_surname.txt', 'list')
         for i in range(EMPLOYEES_SIZE):
             name = f'{names[rd.randint(0,11)]} {surnames[rd.randint(0,5)]}'
             cursor.execute(
@@ -121,49 +120,32 @@ def insert_employees(cursor: Any) -> None:
     except Exception as ex:
         raise Exception(f'File error: {ex}')
 
-
-
-###TODO -> REVISAR E FINALIZAR SCRIPT
-def is_located(cursor: Any, car_id: int, date: str) -> bool:
+def is_located(cursor, car_id, start, end_time):
     cursor.execute(
         f"""
             SELECT rent_id FROM rent_table 
-            WHEN car_id = {car_id} AND {date} >= start AND {date} <= end_time
+            WHERE fk_car_id = {car_id} AND 
+            '{start}' >= start AND '{end_time}' <= end_time
         """
     )
-    return len(cursor.fetchall()) == 0
+    return len(cursor.fetchall()) != 0
     
-def increment_date(date: str, incr_h=0, incr_d=0) -> str:
-    datetime_list = date.split()
-    date = datetime_list[0].split('-')
-    time = datetime_list[1].split(':')
-    date[1] += incr_d
-    time[1] += incr_h
-    return f'{date[0]}-{date[1]}-{date[2]} {time[0]}:{time[1]}:{time[2]}'
-
-def decremet_date(date: str, drec_h=0, decr_d=0) -> str:
-    datetime_list = date.split()
-    date = datetime_list[0].split('-')
-    time = datetime_list[1].split(':')
-    date[1] -= decr_d
-    time[1] -= drec_h
-    return f'{date[0]}-{date[1]}-{date[2]} {time[0]}:{time[1]}:{time[2]}'
+def get_random_date() -> datetime:
+    return datetime(
+        year=2023, month=rd.randint(1,12), day=rd.randint(1,28),
+        hour=0, minute=0, microsecond=0
+    )
 
 def insert_rents(cursor: Any) -> None:
-    date = '2023-01-00 00:00:00'
-    steps_day = [1,2,3]
-    counter = 0
-    values = [1000, 2000, 3000]
-    insurances = ['SILVER', 'GOLD', 'PLATINUM']
+    counter = 1
+    insurances = ['silver', 'gold', 'platinum']
     while counter < 2500:
         car_id = rd.randint(1,CARS_SIZE)
-        incr_step = steps_day[rd.randint(0,2)]
-        date = increment_date(date, incr_d=incr_step)
-        if is_located(cursor, car_id, date): 
-            date = decremet_date(date, decr_d=incr_step)
+        start = get_random_date()
+        end = start + timedelta(days=rd.randint(1,3))
+        if is_located(cursor, car_id, start, end): 
             continue
         else:
-            value = values[rd.randint(0,2)]
             cursor.execute(
                 f"""
                     INSERT INTO rent_table(
@@ -172,38 +154,27 @@ def insert_rents(cursor: Any) -> None:
                         fk_car_id, fk_customer_id, insurance_type
                     )
                     VALUES(
-                        {counter+1}, {value}, {date},
-                        {increment_date(date, incr_d=incr_step)}, {value}, 
-                        {rd.randint(1,EMPLOYEES_SIZE)},
+                        {counter}, {round(rd.uniform(500, 3000), 2)}, '{start}',
+                        '{end}', {rd.randint(1000,5000)}, {rd.randint(1,EMPLOYEES_SIZE)},
                         {rd.randint(1, CARS_SIZE)}, {rd.randint(1, CUSTOMERS_SIZE)}, 
-                        {insurances[rd.randint(0,2)]}
+                        '{insurances[rd.randint(0,2)]}'
                     )
                 """
             )
             counter += 1
-###
-
-
 
 def main():
     try:
         connection: Any = mysql.connector \
-            .connect(**get_json_file('database/scripts','db_config.json'))
+            .connect(**read_file('database/scripts','db_config.json'))
         cursor: Any = connection.cursor()
         cursor.execute("SET NAMES 'utf8';")
-        #insert_customer_random_data(cursor)
-        #insert_telephones(cursor)
-        #insert_models(cursor)
-        #insert_cars(cursor)
-        #insert_employees(cursor)
-        
-
-        
-        ###
-        #insert_rents(cursor)
-
-
-
+        insert_customer_random_data(cursor)
+        insert_telephones(cursor)
+        insert_models(cursor)
+        insert_cars(cursor)
+        insert_employees(cursor)
+        insert_rents(cursor)
     except mysql.connector.Error as error:
         print(f'DB error: {error}')
     finally:
